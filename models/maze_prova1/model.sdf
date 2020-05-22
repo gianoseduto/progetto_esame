@@ -20,8 +20,9 @@
         </geometry>
         <material>
           <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
+            <uri>model://materials/scripts</uri>
+            <uri>model://materials/textures</uri>
+            <name>wallTexture/arrow_right</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
@@ -49,8 +50,9 @@
         </geometry>
         <material>
           <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
+            <uri>model://materials/scripts</uri>
+            <uri>model://materials/textures</uri>
+            <name>wallTexture/arrow_right</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
@@ -78,8 +80,9 @@
         </geometry>
         <material>
           <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
+            <uri>model://materials/scripts</uri>
+            <uri>model://materials/textures</uri>
+            <name>wallTexture/arrow_right</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
@@ -165,8 +168,9 @@
         </geometry>
         <material>
           <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
+            <uri>model://materials/scripts</uri>
+            <uri>model://materials/textures</uri>
+            <name>wallTexture/arrow_left</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
@@ -774,8 +778,9 @@
         </geometry>
         <material>
           <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
+            <uri>model://materials/scripts</uri>
+            <uri>model://materials/textures</uri>
+            <name>wallTexture/arrow_left</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
