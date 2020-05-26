@@ -23,6 +23,11 @@
 	<pose> 5.4 -0.28 0 0 0 -1.5664 </pose>
     </include>
 
+    <!-- A ground sphere -->
+    <include>
+      <uri>model://unit_sphere_red</uri>
+      <pose> 0.84 -0.022 0.218 0.529 0 0</pose>
+    </include>
 
     <physics type="ode">
       <real_time_update_rate>1000.0</real_time_update_rate>
@@ -44,6 +49,13 @@
         </constraints>
       </ode>
     </physics>
+
+  <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>0.8 0.0 12.0 0 1.5708 0</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
   </world>
 
 </sdf>
