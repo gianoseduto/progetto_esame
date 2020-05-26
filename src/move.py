@@ -15,14 +15,43 @@ class Follower:
 		cv2.resizeWindow('Window',30,30)
 		#self.image_sub=rospy.Subscriber('/camera/rgb/image_raw',Image,self.image_callback)
 		self.image_sub=rospy.Subscriber('/camera/image',Image,self.image_callback)
+		self.cmd_vel_pub =rospy.Publisher('cmd_vel', Twist, queue_size=1)
+		self.twist=Twist()
 
 	def image_callback(self,msg):
 		image=self.bridge.imgmsg_to_cv2(msg,desired_encoding='bgr8')
-		cv2.imshow('window',image)
+		hsv=cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+		#Red
+		low_red = np.array([161, 155, 84])
+		high_red = np.array([179, 255, 255])
+		red_mask = cv2.inRange(hsv_frame, low_red, high_red)
+		red = cv2.bitwise_and(frame, frame, mask=red_mask)
+
+		cv2.imshow('window', image)
 		cv2.waitKey(10)
+		
+		rospy.loginfo('ciao2')
+		printer()
+
+		if np.any(red) == True:
+			self.twist.linear.x=0.2
+			self.cmd_vel_pub.publish(self.twist)
+		
+		
+		#Green
+'''
+		low_green = np.array([25, 52, 72])
+    high_green = np.array([102, 255, 255])
+    green_mask = cv2.inRange(hsv, low_green, high_green)
+    green = cv2.bitwise_and(image, image, mask=green_mask)
+'''
+
+def printer():
+	rospy.init_node('printer_node')
+	print('a');
+	
 
 def controller():
-	
 	rospy.init_node('follower')
 	follower=Follower()
 	rospy.spin()

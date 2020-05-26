@@ -20,9 +20,8 @@
         </geometry>
         <material>
           <script>
-            <uri>model://materials/scripts</uri>
-            <uri>model://materials/textures</uri>
-            <name>wallTexture/arrow_right</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Red</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
@@ -227,8 +226,9 @@
         </geometry>
         <material>
           <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grey</name>
+            <uri>model://materials/scripts</uri>
+            <uri>model://materials/textures</uri>
+            <name>wallTexture/arrow_right</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
@@ -778,9 +778,8 @@
         </geometry>
         <material>
           <script>
-            <uri>model://materials/scripts</uri>
-            <uri>model://materials/textures</uri>
-            <name>wallTexture/arrow_left</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Green</name>
           </script>
           <ambient>1 1 1 1</ambient>
         </material>
