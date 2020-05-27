@@ -26,12 +26,12 @@
     <!-- A ground sphere -->
     <include>
       <uri>model://unit_sphere_green</uri>
-      <pose> 1 0 0.2 0.529 0 0</pose>
+      <pose> 5 0 6 0.529 0 0</pose>
     </include>
 <!-- A ground sphere -->
     <include>
       <uri>model://unit_sphere_blue</uri>
-      <pose> 0.7 0 0.2 0 0 0</pose>
+      <pose> 3 0 0.2 0 0 0</pose>
     </include>
 
 
