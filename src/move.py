@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 import rospy, cv2, cv_bridge
 import numpy as np
@@ -12,17 +12,26 @@ import random
 
 def scan_callback(msg):
 	global g_range_ahead
-	g_range_ahead=min(msg.ranges[0:10]) #min(msg.ranges) 
-	print('scan', g_range_ahead)
+	global g_range_right
+	global g_range_left
+	global g_range_behind
+	g_range_left=min(msg.ranges[45:134]) 
+	g_range_ahead=min(min(msg.ranges[0:15]),min(msg.ranges[345:359]))
+	g_range_right=min(msg.ranges[225:314])
+	g_range_behind=min(msg.ranges[135:224])
+	
 
 g_range_ahead=1
+g_range_right=1
+g_range_left=1
+g_range_behind=1
 
 
 class Follower:
 	def __init__(self):
 		print('init Follower')
 		#controlla se stiamo leggendo l'immagine del colore o no
-		#così da poter 'virare' per non andare a sbattere al muro solo se non sto girando
+		#cosi da poter virare per non andare a sbattere al muro solo se non sto girando
 		#per cambiare direzione a seconda del colore
 		self.img = False
 		self.bridge=cv_bridge.CvBridge()
@@ -36,16 +45,16 @@ class Follower:
 		self.cmd_vel_sub = rospy.Subscriber('cmd_vel', Twist, self.twist_callback)
 		self.twist=Twist()
 		
-#in teoria legge la velocità corrente dal canale sub e aggiunge 0.1 
-# in direzione negativa o positiva per correggere il tiro
-#invece sovrascrive la velocità angolare con -0.1
+	#in teoria legge la velocita corrente dal canale sub e aggiunge 0.1 
+	#in direzione negativa o positiva per correggere il tiro
+	#invece sovrascrive la velocita angolare con -0.1
 	def twist_callback(self,vel):
 		#print('angular z= ',vel.angular.z)
 		if not self.img:
 			#print('not img')
-			if (g_range_ahead <= 1):
+			if (g_range_ahead <= 0.3):
 				print('near')
-				if vel.angular.z < 0:
+				if  g_range_right < g_range_left:
 					self.twist.angular.z = vel.angular.z + 0.1
 					self.twist.linear.x = 0.1
 				else:
@@ -56,7 +65,7 @@ class Follower:
 				self.twist.linear.x = 0.2
 
 			self.cmd_vel_pub.publish(self.twist)
-			print('changed z ',self.twist.angular.z)
+			#print('changed z ',self.twist.angular.z)
 		else:
 			print('yes img')
 			
