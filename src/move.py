@@ -10,6 +10,8 @@ from sensor_msgs.msg import Image
 from sensor_msgs.msg import LaserScan
 import random 
 
+PI = 3.1415926535897
+
 def scan_callback(msg):
 	global g_range_ahead
 	global g_range_ahead_right
@@ -42,7 +44,6 @@ class Follower:
 		self.img = False
 		self.bridge=cv_bridge.CvBridge()
 		cv2.namedWindow('Window',cv2.WINDOW_NORMAL)
-		cv2.resizeWindow('Window',30,30)
 		self.image_sub=rospy.Subscriber('/camera/rgb/image_raw',Image,self.image_callback)
 		self.scan_sub = rospy.Subscriber('scan', LaserScan, scan_callback)
 		
@@ -56,40 +57,66 @@ class Follower:
 	#invece sovrascrive la velocita angolare con -0.1
 	def twist_callback(self,vel):
 		#print('angular z= ',vel.angular.z)
-				
-		if not self.img:
-			#print('not img')
-			if (g_range_ahead <= 0.5 ):
-				if (g_range_ahead <= 0.3):
-					if  g_range_right < g_range_left:
-						print('stop-left')						
-						self.twist.angular.z = vel.angular.z + 0.3
-						self.twist.linear.x = 0
-					else:
-						print('stop-right')
-						self.twist.angular.z = vel.angular.z - 0.3
-						self.twist.linear.x = 0
-				
-				else:	
-					if  g_range_right < g_range_left:
-						print('left')
-						self.twist.angular.z = vel.angular.z + 0.3
-						self.twist.linear.x = 0.1
-					else:	
-						print('right')
-						self.twist.angular.z = vel.angular.z - 0.3
-						self.twist.linear.x = 0.1
-				
-			else:	
-
-				self.twist.angular.z= 0.0
-				self.twist.linear.x = 0.2
-
-			self.cmd_vel_pub.publish(self.twist)
-			rospy.Rate(10).sleep()
-			#print('changed z ',self.twist.angular.z)
+		if (g_range_ahead < 0.1):
+			while(g_range_ahead<0.5):
+				self.twist.linear.x = -0.1
 		else:
-			print('yes img')
+			if not self.img:
+				if (g_range_ahead <= 0.5 ):
+					if (g_range_ahead <= 0.4):
+						if (g_range_right>0.20 and g_range_left < 0.20):
+							self.twist.linear.x = -0.2
+							self.twist.angular.z = vel.angular.z + random.randint(-0.3, 0.3)
+							print('random angle')
+						elif  g_range_right < g_range_left:
+							print('stop-left', g_range_right)
+							self.twist.angular.z = vel.angular.z + 0.3
+							self.twist.linear.x = -0.2
+						else:
+							print('stop-right', g_range_left)
+							self.twist.angular.z = vel.angular.z - 0.3
+							self.twist.linear.x = -0.2
+						
+					else:	
+						if  g_range_right < g_range_left:
+							print('left ', vel.angular.z)
+							self.twist.angular.z = vel.angular.z + 0.3
+							self.twist.linear.x = 0.1
+						else:	
+							print('right')
+							self.twist.angular.z = vel.angular.z - 0.3
+							self.twist.linear.x = 0.1
+				elif(g_range_ahead_right <0.2):
+					self.twist.angular.z = vel.angular.z + 0.3
+					print('too much right vel.ang: ', vel.angular.z)
+				elif(g_range_ahead_left <0.1):
+					self.twist.angular.z = vel.angular.z - 0.3
+					print('too much left vel.ang', vel.angular.z)
+					
+				else:						
+					self.twist.angular.z= 0.0
+					self.twist.linear.x = 0.2
+				
+
+				self.cmd_vel_pub.publish(self.twist)
+				rospy.Rate(10).sleep()
+				#print('changed z ',self.twist.angular.z)
+			else:
+				print('reading img')
+				if (g_range_ahead <= 0.5):
+					print('stop')
+					self.twist.linear.x = -0.1
+					if (vel.angular.z >0):
+						self.twist.angular.z =0.2
+					else: 
+						self.twist.angular.z =-0.2
+					
+				else: 
+					print('i\'m free')
+					self.twist.linear.x = 0.1
+
+		self.cmd_vel_pub.publish(self.twist)
+		rospy.Rate(10).sleep()
 			
 
 	def image_callback(self,msg):
@@ -110,12 +137,24 @@ class Follower:
 		high_green = np.array([102, 255, 255])
 		green_mask = cv2.inRange(hsv, low_green, high_green)
 		green = cv2.bitwise_and(image, image, mask=green_mask)
+		
+		#White. Entrance of maze
+		low_white = np.array([0,0,0], dtype=np.uint8)
+    		high_white = np.array([0,0,255], dtype=np.uint8)
+		white_mask = cv2.inRange(hsv, low_white, high_white)
+		white = cv2.bitwise_and(image, image, mask=white_mask)
+		
+		#Yellow. Exit of maze
+		low_yellow=np.array([20,100,100])
+		high_yellow=np.array([30,255,255])
+		yellow_mask=cv2.inRange(hsv,low_yellow,high_yellow)
+		yellow=cv2.bitwise_and(image,image,mask=yellow_mask)
 
 		cv2.imshow('window', image)
-		cv2.imshow('blue', blue)
-		cv2.imshow('mask_b', blue_mask)
-		cv2.imshow('green', green)
-		cv2.imshow('mask_g', green_mask)
+		#cv2.imshow('blue', blue)
+		#cv2.imshow('mask_b', blue_mask)
+		#cv2.imshow('white', white)
+		#cv2.imshow('mask_w', white_mask)
 		cv2.waitKey(10)
 		
 		if (np.count_nonzero(blue)>210000):
@@ -125,7 +164,6 @@ class Follower:
 			if (g_range_ahead <= 0.3):
 				self.twist.linear.x=0
 			self.twist.angular.z=-0.3
-			self.cmd_vel_pub.publish(self.twist)
 		elif (np.count_nonzero(green)>250000):
 			#print('green')
 			self.img=True
@@ -133,13 +171,21 @@ class Follower:
 			if (g_range_ahead <= 0.3):
 				self.twist.linear.x=0
 			self.twist.angular.z=0.3
-			self.cmd_vel_pub.publish(self.twist)
+		elif (np.size(image)-np.count_nonzero(white)>250000):
+			print(np.count_nonzero(white), 'mask ', np.size(image))
+			self.img=True
+			self.twist.linear.x=0
+			self.twist.angular.z= 2*PI
+		elif (np.count_nonzero(yellow)>250000):
+			self.twist.angular.z=0.0
+			self.twist.linear.x=0.0
 		else: 
 			self.img=False
 			#print('nothing')
 			self.twist.linear.x=0.2
 			self.twist.angular.z=0.0
-			self.cmd_vel_pub.publish(self.twist)
+		
+		self.cmd_vel_pub.publish(self.twist)
 
 	
 
