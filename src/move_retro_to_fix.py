@@ -38,7 +38,8 @@ class Follower:
 		#controlla se stiamo leggendo l'immagine del colore o no
 		#cosi da poter virare per non andare a sbattere al muro solo se non sto girando
 		#per cambiare direzione a seconda del colore
-			
+		global retro
+		self.retro=False		
 		self.img = False
 		self.bridge=cv_bridge.CvBridge()
 		cv2.namedWindow('Window',cv2.WINDOW_NORMAL)
@@ -59,18 +60,22 @@ class Follower:
 				
 		if not self.img:
 			#print('not img')
-			if (g_range_ahead <= 0.5 ):
-				if (g_range_ahead <= 0.3):
+			if (g_range_ahead <= 0.4 ):
+				if(g_range_behind<= 0.15):
+					self.retro=False
+				#se il robot si avvicina troppo ad un ostacolo attiviamo il flag retro per avviare una manovra di ri-posizionamento				
+				if (g_range_ahead <= 0.15):
+					print('retro')
+					self.retro=True
 					if  g_range_right < g_range_left:
-						print('stop-left')						
-						self.twist.angular.z = vel.angular.z + 0.3
-						self.twist.linear.x = 0
-					else:
-						print('stop-right')
 						self.twist.angular.z = vel.angular.z - 0.3
-						self.twist.linear.x = 0
+						self.twist.linear.x = -0.1
+					else:
+						self.twist.angular.z = vel.angular.z + 0.3
+						self.twist.linear.x = -0.1
 				
-				else:	
+				elif not (self.retro):	
+					
 					if  g_range_right < g_range_left:
 						print('left')
 						self.twist.angular.z = vel.angular.z + 0.3
@@ -79,10 +84,18 @@ class Follower:
 						print('right')
 						self.twist.angular.z = vel.angular.z - 0.3
 						self.twist.linear.x = 0.1
-				
+				elif (self.retro):
+					print('retro')					
+					if  g_range_right < g_range_left:
+						self.twist.angular.z = vel.angular.z - 0.3
+						self.twist.linear.x = -0.1
+					else:
+						self.twist.angular.z = vel.angular.z + 0.3
+						self.twist.linear.x = -0.1	
 			else:	
-
-				self.twist.angular.z= 0.0
+				if (g_range_ahead >= 0.8 or g_range_behind <= 0.15 ):
+					self.retro=False
+				self.twist.angular.z=0
 				self.twist.linear.x = 0.2
 
 			self.cmd_vel_pub.publish(self.twist)
@@ -118,20 +131,16 @@ class Follower:
 		cv2.imshow('mask_g', green_mask)
 		cv2.waitKey(10)
 		
-		if (np.count_nonzero(blue)>210000):
+		if (np.count_nonzero(blue)>120000):
 			self.img=True
 			#print('blue-right')
 			self.twist.linear.x=0.2
-			if (g_range_ahead <= 0.3):
-				self.twist.linear.x=0
 			self.twist.angular.z=-0.3
 			self.cmd_vel_pub.publish(self.twist)
-		elif (np.count_nonzero(green)>250000):
+		elif (np.any(green) and g_range_ahead < 1):
 			#print('green')
 			self.img=True
 			self.twist.linear.x=0.2
-			if (g_range_ahead <= 0.3):
-				self.twist.linear.x=0
 			self.twist.angular.z=0.3
 			self.cmd_vel_pub.publish(self.twist)
 		else: 

@@ -23,15 +23,46 @@
 	<pose> 5.4 -0.28 0 0 0 -1.5664 </pose>
     </include>
 
-    <!-- A ground sphere -->
+    <!-- spheres
     <include>
       <uri>model://unit_sphere_green</uri>
       <pose> 5 0 6 0.529 0 0</pose>
     </include>
-<!-- A ground sphere -->
+	
     <include>
       <uri>model://unit_sphere_blue</uri>
       <pose> 3 0 0.2 0 0 0</pose>
+    </include>
+	-->
+	<!--Cartello blue -->
+    <include>
+      <uri>model://tile_blue</uri>
+	<name>tile_blue_1</name>
+	<pose> 2.8 0.03 0.1 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://tile_blue</uri>
+	<name>tile_blue_2</name>
+	<pose> 2.6 -2.6 0.1 0 0 -1.56</pose>
+    </include>
+
+	<!--Cartello verde -->
+    <include>
+      <uri>model://tile_green</uri>
+	<name>tile_green_1</name>
+	<pose> 0.73 -2.5 0.1 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://tile_green</uri>
+	<name>tile_green_2</name>
+	<pose> 4.3 -2.2 0.1 0 0 -1.56</pose>
+    </include>
+
+    <include>
+      <uri>model://tile_green</uri>
+	<name>tile_green_3</name>
+	<pose> 4.5 -4.8 0.1 0 0 0</pose>
     </include>
 
 
