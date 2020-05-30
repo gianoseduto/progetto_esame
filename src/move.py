@@ -33,6 +33,8 @@ g_range_behind=1
 g_range_ahead_right=1
 g_range_ahead_left=1
 g_color = str("none")
+#first or second route
+direction = 1 #random.randint(0,1)
 
 class Follower:
 	
@@ -150,49 +152,59 @@ class Follower:
 		yellow_mask=cv2.inRange(hsv,low_yellow,high_yellow)
 		yellow=cv2.bitwise_and(image,image,mask=yellow_mask)
 
+		#Purple
+		low_purple = np.array([145,100,20], dtype=np.uint8)
+		high_purple = np.array([160,255,255], dtype=np.uint8)
+		purple_mask = cv2.inRange(hsv, low_purple, high_purple)
+		purple = cv2.bitwise_and(image, image, mask=purple_mask)
+
 		cv2.imshow('window', image)
-		#cv2.imshow('blue', blue)
-		#cv2.imshow('mask_b', blue_mask)
+		#cv2.imshow('purple', purple)
+		#cv2.imshow('purple', purple_mask)
 		#cv2.imshow('white', white)
 		#cv2.imshow('mask_w', white_mask)
 		cv2.waitKey(10)
 		
 		if (np.count_nonzero(white)>210000):
-			print('white')
+			#print('white')
 			self.img=True
 			self.twist.linear.x=0
 			self.twist.angular.z= 2*PI
-
-		else:
-			if (np.count_nonzero(blue)>210000):
-				self.img=True
-				g_color="blue"
-				print(g_color)
-				#print('blue-right')
-				self.twist.linear.x=0.2
-				#if (g_range_ahead <= 0.3):
-				#	self.twist.linear.x=0
-				self.twist.angular.z=-0.3
-			elif (np.count_nonzero(green)>250000):
-				
-				g_color="green"
-				print(g_color)
-				self.img=True
-				self.twist.linear.x=0.2
-				#if (g_range_ahead <= 0.3):
-				#	self.twist.linear.x=0
-				self.twist.angular.z=0.3
+		elif (np.count_nonzero(blue)>210000):
+			self.img=True
+			g_color="blue"
+			print(g_color)
+			#print('blue-right')
+			self.twist.linear.x=0.2
+			#if (g_range_ahead <= 0.3):
+			#	self.twist.linear.x=0
+			self.twist.angular.z=-0.3
+		elif (np.count_nonzero(green)>250000):
 			
-			elif (np.count_nonzero(yellow)>250000):
+			g_color="green"
+			self.img=True
+			self.twist.linear.x=0.2
+			#if (g_range_ahead <= 0.3):
+			#	self.twist.linear.x=0
+			self.twist.angular.z=0.3
+		
+		elif (np.count_nonzero(yellow)>250000):
+			self.twist.angular.z=0.0
+			self.twist.linear.x=0.0
+			self.publish("stop")
+		elif (np.count_nonzero(purple)>210000):
+			if direction==1:
 				self.twist.angular.z=0.0
-				self.twist.linear.x=0.0
-				print('arrived')
-			else: 
-				g_color='none'
-				self.img=False
-				#print('nothing')
-				self.twist.linear.x=0.2
-				self.twist.angular.z=0.0
+			else:
+				self.twist.angular.z=-0.3
+			print(direction)
+
+		else: 
+			g_color='none'
+			self.img=False
+			#print('nothing')
+			self.twist.linear.x=0.2
+			self.twist.angular.z=0.0
 		
 		self.cmd_vel_pub.publish(self.twist)
 
