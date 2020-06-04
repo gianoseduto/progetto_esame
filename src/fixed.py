@@ -34,7 +34,7 @@ g_range_ahead_right=1
 g_range_ahead_left=1
 g_color = str("none")
 temp_color = str("none")
-
+direction=1
 class Follower:
 	
 	def __init__(self):
@@ -46,6 +46,8 @@ class Follower:
 		self.temp_color = str("none")
 		self.g_color = str("none")	
 		self.img = False
+		self.direction=random.randint(0,1)
+		print("direction: ", self.direction)
 		self.bridge=cv_bridge.CvBridge()
 		#cv2.namedWindow('Window',cv2.WINDOW_NORMAL)
 		self.image_sub=rospy.Subscriber('/camera/rgb/image_raw',Image,self.image_callback)
@@ -73,6 +75,11 @@ class Follower:
 					elif(self.temp_color == "blue"):
 						#print('no image blue')
 						self.twist.angular.z =  - 0.3
+					elif(self.temp_color == "purple"):
+						if self.direction==1:
+							self.twist.angular.z = 0.0
+						else:
+							self.twist.angular.z = -0.3	
 				elif(abs(g_range_ahead_right - g_range_ahead_left)>0.1):
 					if  g_range_ahead_right < g_range_ahead_left:
 						#print('stop-left')
@@ -145,6 +152,12 @@ class Follower:
 		yellow_mask=cv2.inRange(hsv,low_yellow,high_yellow)
 		yellow=cv2.bitwise_and(image,image,mask=yellow_mask)
 
+		#Purple
+		low_purple = np.array([145,100,20], dtype=np.uint8)
+		high_purple = np.array([160,255,255], dtype=np.uint8)
+		purple_mask = cv2.inRange(hsv, low_purple, high_purple)
+		purple = cv2.bitwise_and(image, image, mask=purple_mask)
+
 		#cv2.imshow('window', image)
 		#cv2.imshow('blue', blue)
 		#cv2.imshow('mask_b', blue_mask)
@@ -172,7 +185,8 @@ class Follower:
 				self.g_color="yellow"
 				print('arrived')
 				self.arrived=True
-				
+			elif (np.count_nonzero(purple)>500000):
+				self.g_color="purple"	
 			else: 
 				
 				self.img=False
