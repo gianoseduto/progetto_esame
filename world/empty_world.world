@@ -38,14 +38,14 @@
     <include>
       <uri>model://tile_purple</uri>
 	<name>tile_purple_1</name>
-	<pose> 3 0.03 0.1 0 0 0</pose>
+	<pose> 2.77 0.03 0.1 0 0 0</pose>
     </include>
 
 	<!--Cartelli blue -->
  <include>
       <uri>model://tile_blue</uri>
 	<name>tile_blue_1</name>
-	<pose> 5.22 3.20 0.1 0 0 0</pose>
+	<pose> 5.40 3.20 0.1 0 0 0</pose>
     </include>
     <include>
       <uri>model://tile_blue</uri>
@@ -70,24 +70,23 @@
     <include>
       <uri>model://tile_green</uri>
 	<name>tile_green_1</name>
-	<pose> 0.73 -2.5 0.1 0 0 0</pose>
+	<pose> 0.73 -2.44 0.1 0 0 0</pose>
     </include>
 
     <include>
       <uri>model://tile_green</uri>
 	<name>tile_green_2</name>
-	<pose> 4.5 -4.8 0.1 0 0 0</pose>
+	<pose> 4.18 -4.8 0.1 0 0 -1.56</pose>
     </include>
 	<include>
       <uri>model://tile_green</uri>
 	<name>tile_green_3</name>
 	<pose> 7.06 -2.33 0.0 0 0 0</pose>
     </include>
-
-	<include>
+<include>
       <uri>model://tile_green</uri>
-	<name>tile_green_4</name>
-	<pose> 9.04 0.41 0.0 0 0 0</pose>
+	<name>tile_green_3</name>
+	<pose> 9.40 0.81 0.0 0 0 -1.56</pose>
     </include>
 
 <!--Cartello Bianco -->
@@ -101,7 +100,7 @@
 	<include>
       <uri>model://tile_yellow</uri>
 	<name>tile_yellow_1</name>
-	<pose> 10.1 0.48 0.0 0 0 0</pose>
+	<pose> 10.01 0.48 0.0 0 0 0</pose>
     </include>
 
 

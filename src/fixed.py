@@ -34,7 +34,7 @@ g_range_ahead_right=1
 g_range_ahead_left=1
 g_color = str("none")
 temp_color = str("none")
-direction=1
+
 class Follower:
 	
 	def __init__(self):
@@ -46,7 +46,7 @@ class Follower:
 		self.temp_color = str("none")
 		self.g_color = str("none")	
 		self.img = False
-		self.direction=random.randint(0,1)
+		self.direction = 1 #random.randint(0,1)
 		print("direction: ", self.direction)
 		self.bridge=cv_bridge.CvBridge()
 		#cv2.namedWindow('Window',cv2.WINDOW_NORMAL)
@@ -65,7 +65,6 @@ class Follower:
 		if not self.img:
 			#print('no self image', self.temp_color)
 			if (g_range_ahead <= 0.5 or g_range_ahead_right <= 0.3 or g_range_ahead_left <=0.3):
-				#print('close to the wall')
 				self.twist.linear.x = 0
 				if not(self.temp_color == "none"):
 					#print('not none')
@@ -80,7 +79,8 @@ class Follower:
 							self.twist.angular.z = 0.0
 						else:	
 							self.twist.angular.z = - 0.3
-	
+				
+					
 				elif(abs(g_range_ahead_right - g_range_ahead_left)>0.1):
 					if  g_range_ahead_right < g_range_ahead_left:
 						#print('stop-left')
@@ -89,7 +89,15 @@ class Follower:
 					else:
 						#print('stop-right')
 						self.twist.angular.z = - 0.3
+				
+				#corridoio
+				elif (abs(g_range_left - g_range_right )> 0.3 and (g_range_ahead <= 0.5) ):
+					if (g_range_ahead_left> g_range_ahead_right):
+						self.twist.angular.z =  + 45*PI/180
+					else:
+						self.twist.angular.z =  - 45*PI/180
 				else:
+					
 					if  g_range_right < g_range_left:
 						#print('stop-left')
 						self.twist.angular.z =  + 0.3
@@ -97,7 +105,7 @@ class Follower:
 					else:
 						#print('stop-right')
 						self.twist.angular.z = - 0.3
-
+		
 			else:	
 				if (g_range_ahead > 0.6 and g_range_ahead_right > 0.4 and g_range_ahead_left > 0.4):
 					self.temp_color = "none"
@@ -118,7 +126,7 @@ class Follower:
 				if self.direction==1:
 					self.twist.angular.z = 0.0
 				else:	
-					self.twist.angular.z = - 0.3
+					self.twist.angular.z = - 45*PI/180
 			elif(self.temp_color == "yellow"):
 					while(True):
 						self.twist.angular.z =  - 0.3
@@ -186,7 +194,7 @@ class Follower:
 				#print(g_color)
 				self.img=True
 			
-			elif (np.count_nonzero(yellow)>450000):
+			elif (np.count_nonzero(yellow)>350000):
 				self.img=True
 				self.g_color="yellow"
 				print('arrived')
