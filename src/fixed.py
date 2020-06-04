@@ -78,8 +78,9 @@ class Follower:
 					elif(self.temp_color == "purple"):
 						if self.direction==1:
 							self.twist.angular.z = 0.0
-						else:
-							self.twist.angular.z = -0.3	
+						else:	
+							self.twist.angular.z = - 0.3
+	
 				elif(abs(g_range_ahead_right - g_range_ahead_left)>0.1):
 					if  g_range_ahead_right < g_range_ahead_left:
 						#print('stop-left')
@@ -113,6 +114,11 @@ class Follower:
 			elif(self.temp_color == "blue"):
 				#print('no image blue')
 				self.twist.angular.z =  - 0.3
+			elif(self.temp_color == "purple"):
+				if self.direction==1:
+					self.twist.angular.z = 0.0
+				else:	
+					self.twist.angular.z = - 0.3
 			elif(self.temp_color == "yellow"):
 					while(True):
 						self.twist.angular.z =  - 0.3
@@ -186,6 +192,7 @@ class Follower:
 				print('arrived')
 				self.arrived=True
 			elif (np.count_nonzero(purple)>500000):
+				self.img=True
 				self.g_color="purple"	
 			else: 
 				
