@@ -32,47 +32,41 @@ g_range_left=1
 g_range_behind=1
 g_range_ahead_right=1
 g_range_ahead_left=1
-g_color = str("none")
+#colore in lettura
 temp_color = str("none")
 
 class Follower:
 	
 	def __init__(self):
-		#print('init Follower')
-		#controlla se stiamo leggendo l'immagine del colore o no
-		#cosi da poter virare per non andare a sbattere al muro solo se non sto girando
-		#per cambiare direzione a seconda del colore
+		
 		self.arrived = False
 		self.temp_color = str("none")
-		self.g_color = str("none")	
+		#True se sta leggendo colore
 		self.img = False
-		self.direction = 1 #random.randint(0,1)
+		#0: destra - 1: dritto
+		#scelta del percorso 
+		self.direction = random.randint(0,1)
 		print("direction: ", self.direction)
 		self.bridge=cv_bridge.CvBridge()
 		#cv2.namedWindow('Window',cv2.WINDOW_NORMAL)
 		self.image_sub=rospy.Subscriber('/camera/rgb/image_raw',Image,self.image_callback)
 		self.scan_sub = rospy.Subscriber('scan', LaserScan, scan_callback)
 		
-		#self.image_sub=rospy.Subscriber('/camera/image',Image,self.image_callback)
 		self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
-		#self.cmd_vel_sub = rospy.Subscriber('cmd_vel', Twist, self.twist_callback)
 		self.twist=Twist()
 		
 			
-	
+	#algoritmo per evitare i muri e girare
 	def twist_fun(self):
-
+		#immagine in lettura
 		if not self.img:
-			#print('no self image', self.temp_color)
 			if (g_range_ahead <= 0.5 or g_range_ahead_right <= 0.3 or g_range_ahead_left <=0.3):
 				self.twist.linear.x = 0
+				#controllo se colore in lettura per continuare a girare in quella direzione
 				if not(self.temp_color == "none"):
-					#print('not none')
 					if(self.temp_color == "green"):
-						#print('no image green')
 						self.twist.angular.z =  + 0.3
 					elif(self.temp_color == "blue"):
-						#print('no image blue')
 						self.twist.angular.z =  - 0.3
 					elif(self.temp_color == "purple"):
 						if self.direction==1:
@@ -80,14 +74,11 @@ class Follower:
 						else:	
 							self.twist.angular.z = - 0.3
 				
-					
+				#per evitare che si blocchi contro il muro
 				elif(abs(g_range_ahead_right - g_range_ahead_left)>0.1):
 					if  g_range_ahead_right < g_range_ahead_left:
-						#print('stop-left')
 						self.twist.angular.z =  + 0.3
-						
 					else:
-						#print('stop-right')
 						self.twist.angular.z = - 0.3
 				
 				#corridoio
@@ -99,28 +90,25 @@ class Follower:
 				else:
 					
 					if  g_range_right < g_range_left:
-						#print('stop-left')
 						self.twist.angular.z =  + 0.3
 						
 					else:
-						#print('stop-right')
 						self.twist.angular.z = - 0.3
 		
 			else:	
+				#se non sono vicino a nessun muro, metto a none la ariabile temp_color
 				if (g_range_ahead > 0.6 and g_range_ahead_right > 0.4 and g_range_ahead_left > 0.4):
 					self.temp_color = "none"
 				
 				self.twist.linear.x = 0.3
 				self.twist.angular.z = 0
-		else:	
+		else:
+			#lettura dell'immagine quindi vel lineare a 0 per rotare sul posto
 			self.twist.linear.x = 0
-			self.temp_color = self.g_color
 			
 			if(self.temp_color == "green"):
-				#print('no image green')
 				self.twist.angular.z =  + 0.3
 			elif(self.temp_color == "blue"):
-				#print('no image blue')
 				self.twist.angular.z =  - 0.3
 			elif(self.temp_color == "purple"):
 				if self.direction==1:
@@ -140,33 +128,35 @@ class Follower:
 	def image_callback(self,msg):
 		image=self.bridge.imgmsg_to_cv2(msg,desired_encoding='bgr8')
 		hsv=cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-		#Blue
+
+		#creazione delle maschere per i colori
+		#Blue - right
 		low_blue= np.array([100,150,0])
 		high_blue = np.array([140,255,255])
 
 		blue_mask = cv2.inRange(hsv, low_blue, high_blue)
 		blue = cv2.bitwise_and(image, image, mask= blue_mask)
 		
-		#Green					
+		#Green - left					
 		low_green = np.array([25, 52, 72])
 		high_green = np.array([102, 255, 255])
 		green_mask = cv2.inRange(hsv, low_green, high_green)
 		green = cv2.bitwise_and(image, image, mask=green_mask)
 		
-		#White. Entrance of maze
+		#White - entrance of maze
 		sensitivity = 15
 		low_white = np.array([0,0,255-sensitivity], dtype=np.uint8)
 		high_white = np.array([255,sensitivity,255], dtype=np.uint8)
 		white_mask = cv2.inRange(hsv, low_white, high_white)
 		white = cv2.bitwise_and(image, image, mask=white_mask)
 		
-		#Yellow. Exit of maze
+		#Yellow - exit of maze
 		low_yellow=np.array([20,100,100])
 		high_yellow=np.array([30,255,255])
 		yellow_mask=cv2.inRange(hsv,low_yellow,high_yellow)
 		yellow=cv2.bitwise_and(image,image,mask=yellow_mask)
 
-		#Purple
+		#Purple - choose right or straight
 		low_purple = np.array([145,100,20], dtype=np.uint8)
 		high_purple = np.array([160,255,255], dtype=np.uint8)
 		purple_mask = cv2.inRange(hsv, low_purple, high_purple)
@@ -179,31 +169,25 @@ class Follower:
 		#cv2.imshow('mask_w', white_mask)
 		cv2.waitKey(10)
 		
+		#controllo valori della matrice risultante per leggere il colore solo dopo una certa soglia
 		if (np.count_nonzero(white)>210000):
-			#print('white')
 			self.img=True
-
 		else:
 			if (np.count_nonzero(blue)>500000):
 				self.img=True
-				self.g_color="blue"
-				#print(g_color)
-				
+				self.temp_color="blue"				
 			elif (np.count_nonzero(green)>500000):
-				self.g_color="green"
-				#print(g_color)
-				self.img=True
-			
+				self.temp_color="green"
+				self.img=True			
 			elif (np.count_nonzero(yellow)>350000):
 				self.img=True
-				self.g_color="yellow"
+				self.temp_color="yellow"
 				print('arrived')
 				self.arrived=True
 			elif (np.count_nonzero(purple)>500000):
 				self.img=True
-				self.g_color="purple"	
+				self.temp_color="purple"	
 			else: 
-				
 				self.img=False
 		
 		if not self.arrived:
@@ -215,18 +199,14 @@ class Follower:
 			rospy.Rate(10).sleep()
 	
 
-def controller():
-	#print('controller')	
+def controller():	
 	rospy.init_node('follower')
-	#print('init node')	
 	follower=Follower()
-	#print('rospy')
 	rospy.spin()
 	
 	
 if __name__ =='__main__':
 	try:	
-		#print('try')
 		controller()
 	except rospy.ROSInterruptException: 
 		pass
